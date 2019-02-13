@@ -1,0 +1,27 @@
+package app.views;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+
+/**
+ *
+ * @param <T> - model to present,
+ *           supposed to have getters
+ *           for fields to be presented
+ *           e.g. if model have only getName()
+ *           it will be presented only by its name
+ */
+public interface View<T> {
+    String show(T user);
+    String showAll(List<T> users);
+
+    default String ejectString(Method getter, Object o) {
+        try {
+            return getter.invoke(o).toString();
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+}

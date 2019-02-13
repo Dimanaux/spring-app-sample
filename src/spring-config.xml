@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- NOTE: Do not use config like that. It is just an example! -->
+    <!-- Spring creates all beans defined here, so define only beans you need -->
+
+    <!-- Databases -->
+
+    <!--fake database-->
+    <bean id="fakeDatabase" class="app.db.FakeDatabase"/>
+
+    <!--postgres database-->
+    <bean id="postgresDatabase" class="app.db.PostgresDatabase">
+        <constructor-arg name="configuration" ref="databaseConfig"/>
+    </bean>
+
+    <!--jdbc database configuration-->
+    <bean id="databaseConfig" class="app.db.util.DatabaseConnectionConfiguration">
+        <!-- url -->
+        <constructor-arg value="jdbc:postgresql://localhost:5432/spring_sample"/>
+
+        <!-- username -->
+        <constructor-arg value="postgres"/>
+
+        <!-- password -->
+        <constructor-arg value="postgres"/>
+    </bean>
+
+    <!--file (document) database-->
+    <!-- NOTE: requires database.csv created in / -->
+    <bean id="fileDatabase" class="app.db.FileDatabase">
+        <constructor-arg name="reader" ref="fileDatabaseReader"/>
+    </bean>
+    <bean id="fileDatabaseReader" class="java.io.BufferedReader">
+        <constructor-arg name="in" ref="databaseInputStreamReader"/>
+    </bean>
+    <bean id="databaseInputStreamReader" class="java.io.InputStreamReader">
+        <constructor-arg name="in" ref="databaseFileInputStream"/>
+    </bean>
+    <!--!! path !!-->
+    <bean id="databaseFileInputStream" class="java.io.FileInputStream">
+        <constructor-arg name="name" value="database.csv"/>
+    </bean>
+
+    <!-- Views -->
+    <bean id="htmlView" class="app.views.HtmlView"/>
+
+    <bean id="jsonView" class="app.views.JsonView">
+        <constructor-arg name="json" ref="gson"/>
+    </bean>
+    <bean id="gson" class="com.google.gson.Gson"/>
+
+    <!-- App configuration -->
+    <bean id="app" class="app.App">
+        <!--<constructor-arg name="database" ref="fileDatabase"/>-->
+        <constructor-arg name="database" ref="fakeDatabase"/>
+        <!--<constructor-arg name="database" ref="postgresDatabase"/>-->
+        <!--<constructor-arg name="view" ref="jsonView"/>-->
+        <constructor-arg name="view" ref="htmlView"/>
+
+        <!--<constructor-arg name="printWriter" ref="defaultOutput"/>-->
+        <constructor-arg name="printWriter" ref="fileOutput"/>
+    </bean>
+
+    <!-- print stream -->
+    <util:constant id="systemOut" static-field="java.lang.System.out"/>
+
+    <bean id="defaultOutput" class="java.io.PrintWriter">
+        <constructor-arg name="out" ref="systemOut"/>
+    </bean>
+
+    <bean id="fileOutput" class="java.io.PrintWriter">
+        <!--<constructor-arg name="file" ref="textOutputFile"/>-->
+        <!--<constructor-arg name="file" ref="jsonOutputFile"/>-->
+        <constructor-arg name="file" ref="htmlOutputFile"/>
+    </bean>
+
+    <bean id="textOutputFile" class="java.io.File">
+        <constructor-arg name="pathname" value="output.txt"/>
+    </bean>
+
+    <bean id="jsonOutputFile" class="java.io.File">
+        <constructor-arg name="pathname" value="output.json"/>
+    </bean>
+
+    <bean id="htmlOutputFile" class="java.io.File">
+        <constructor-arg name="pathname" value="output.html"/>
+    </bean>
+</beans>
