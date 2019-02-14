@@ -15,13 +15,4 @@ import java.util.List;
 public interface View<T> {
     String show(T user);
     String showAll(List<T> users);
-
-    default String ejectString(Method getter, Object o) {
-        try {
-            return getter.invoke(o).toString();
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 }
