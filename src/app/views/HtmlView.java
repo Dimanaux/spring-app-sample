@@ -10,10 +10,6 @@ import java.util.stream.Stream;
  * one User = one row
  */
 public class HtmlView implements View<User> {
-    private String wrap(Object value) {
-        return String.format("<td>%s</td>", value);
-    }
-
     @Override
     public String show(User user) {
         String fields = Stream.of(user.getClass().getMethods())
@@ -32,5 +28,18 @@ public class HtmlView implements View<User> {
                 .reduce(String::concat)
                 .orElse("Empty");
         return String.format("<table>%s</table>", table);
+    }
+    
+    private String wrap(Object value) {
+        return String.format("<td>%s</td>", value);
+    }
+
+    public String ejectString(Method getter, Object o) {
+        try {
+            return getter.invoke(o).toString();
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }
